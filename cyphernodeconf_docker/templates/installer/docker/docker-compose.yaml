@@ -52,10 +52,10 @@ services:
     networks:
       - cyphernodenet
     restart: always
-    <% if ( features.indexOf('tor') !== -1 ) { %>
     depends_on:
-      - tor
       - bitcoin
+    <% if ( features.indexOf('tor') !== -1 ) { %>
+      - tor
     <% } %>
 #    deploy:  --lightning-dir=/.lightning
 #      placement:
@@ -98,6 +98,7 @@ services:
 #        constraints: [node.hostname==dev]
   <% } %>
 
+  <% if ( features.indexOf('elements') !== -1 ) { %>
   ##########################
   # ELEMENTS               #
   ##########################
@@ -105,6 +106,10 @@ services:
   elements:
     image: cyphernode/elements:<%= elements_version %>
     command: $USER /.elements/entrypoint.sh
+    <% if( elements_expose ) { %>
+    ports:
+      - "<%= (net === 'regtest') ? '18886:18886' : ((net === 'testnet') ? '18886:18886' : '7042:7042') %>"
+    <% } %>
     volumes:
       - "<%= elements_datapath %>:/.elements"
       - container_monitor:/container_monitor
@@ -116,14 +121,15 @@ services:
     networks:
       - cyphernodenet
     restart: always
-    <% if ( features.indexOf('tor') !== -1 ) { %>
     depends_on:
-      - tor
       - bitcoin
+    <% if ( features.indexOf('tor') !== -1 ) { %>
+      - tor
     <% } %>
 #    deploy:
 #      placement:
 #        constraints: [node.hostname==dev]
+  <% } %>
 
   ##########################
   # PROXY                  #
